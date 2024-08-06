@@ -1,10 +1,11 @@
-import { getAllCustomers, remove, save, search, update } from '../model/CustomerModel.js';
+import { getAll, getAllCustomers, remove, save, search, update } from '../model/CustomerModel.js';
 import { loadDataIntoCustomerField } from '../controller/OrderController.js';
 
 
 clearTable();
 loadAllCustomers();
 nextCustomerId();
+getAll();
 export { saveCustomer, deleteCustomer, updateCustomer, clearFields };
 
 
@@ -15,6 +16,13 @@ function loadAllCustomers() {
         reloadTable(customer);
     });
 }
+
+// function getAllCustomers(){
+//     let customers = getAll();
+//     customers.forEach(customer => {
+//         reloadTable(customer);
+//     });
+// }
 
 function reloadTable(customer) {
     let tableBody = document.getElementById('customer-table-body');
@@ -243,13 +251,13 @@ document.getElementById('CustomerId').addEventListener('keydown', function(event
 });
 
 function getCustomer(id){
-    const customer = search(id);
+    let customer = search(id);
     
-                // // Update the UI with customer details
-                document.getElementById('CustomerId').value = customer.cusId;
-                document.getElementById('CustomerName').value = customer.cusName;
-                document.getElementById('CustomerAddress').value = customer.address;
-                document.getElementById('CustomerSalary').value = customer.salary;
+    // Update the UI with customer details
+    // document.getElementById('CustomerId').value = customer.cusId;
+    // document.getElementById('CustomerName').value = customer.cusName;
+    // document.getElementById('CustomerAddress').value = customer.address;
+    // document.getElementById('CustomerSalary').value = customer.salary;
             
 }
 
