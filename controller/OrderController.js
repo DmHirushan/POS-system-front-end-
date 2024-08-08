@@ -1,5 +1,5 @@
 import { getAllItems, update } from "../model/ItemModel.js";
-import { getAllCustomers } from "../model/CustomerModel.js";
+import { getAll } from "../model/CustomerModel.js";
 import { getAllOrders } from "../model/OrderModel.js";
 import { saveOrder } from "../model/OrderModel.js";
 
@@ -54,7 +54,7 @@ function splitItemCodeFromFieldValue(value){
 export function loadDataIntoCustomerField(){
     let field = document.getElementById('customer-select-field');
     field.innerHTML = '';
-    let customers = getAllCustomers();  
+    let customers = getAll();  
     for(let i=0; i<customers.length; i++){
         let option = document.createElement('option');
         // option.value = items[i].itemCode + " " + items[i].itemName;

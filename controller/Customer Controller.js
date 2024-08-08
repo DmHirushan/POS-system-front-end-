@@ -1,5 +1,6 @@
-import { getAll, getAllCustomers, remove, save, search, update } from '../model/CustomerModel.js';
+import { getAll, remove, save, search, update } from '../model/CustomerModel.js';
 import { loadDataIntoCustomerField } from '../controller/OrderController.js';
+import { customers } from '../database/db.js';
 
 
 clearTable();
@@ -11,11 +12,48 @@ export { saveCustomer, deleteCustomer, updateCustomer, clearFields };
 
 function loadAllCustomers() {
     // nextCustomerId();
-    let customers = getAllCustomers();
-    customers.forEach(customer => {
-        reloadTable(customer);
-    });
+    getAll().then((customers) => {
+        reloadTable(customers);
+    })
+   
 }
+
+function reloadTable(customers){
+    let tableBody = document.getElementById('customer-table-body');
+    let customer = [];
+                
+                for(let i=0; i<customers.length; i++){
+                    customer = customers[i];
+                    let newRow = tableBody.insertRow();
+
+                    let cell1 = newRow.insertCell(0);
+                    let cell2 = newRow.insertCell(1);
+                    let cell3 = newRow.insertCell(2);
+                    let cell4 = newRow.insertCell(3);
+
+                    cell1.textContent = customer.id;
+                    cell2.textContent = customer.name;
+                    cell3.textContent = customer.address;
+                    cell4.textContent = customer.salary;
+                }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    console.log("Awa");
+    const table = document.getElementById('customer-table');
+    const rows = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < rows.length; i++) {
+        rows[i].addEventListener('click', function () {
+            const cells = this.getElementsByTagName('td');
+            document.getElementById('CustomerId').value = cells[0].innerText;
+            document.getElementById('CustomerName').value = cells[1].innerText;
+            document.getElementById('CustomerAddress').value = cells[2].innerText;
+            document.getElementById('CustomerSalary').value = cells[3].innerText;
+        });
+    }
+});
+
 
 // function getAllCustomers(){
 //     let customers = getAll();
@@ -24,20 +62,20 @@ function loadAllCustomers() {
 //     });
 // }
 
-function reloadTable(customer) {
-    let tableBody = document.getElementById('customer-table-body');
-    let newRow = tableBody.insertRow();
+// function reloadTable(customer) {
+//     let tableBody = document.getElementById('customer-table-body');
+//     let newRow = tableBody.insertRow();
 
-    let cell1 = newRow.insertCell(0);
-    let cell2 = newRow.insertCell(1);
-    let cell3 = newRow.insertCell(2);
-    let cell4 = newRow.insertCell(3);
+//     let cell1 = newRow.insertCell(0);
+//     let cell2 = newRow.insertCell(1);
+//     let cell3 = newRow.insertCell(2);
+//     let cell4 = newRow.insertCell(3);
 
-    cell1.textContent = customer.cusId;
-    cell2.textContent = customer.cusName;
-    cell3.textContent = customer.cusAddress;
-    cell4.textContent = customer.cusSalary;
-}
+//     cell1.textContent = customer.cusId;
+//     cell2.textContent = customer.cusName;
+//     cell3.textContent = customer.cusAddress;
+//     cell4.textContent = customer.cusSalary;
+// }
 
 function saveCustomer() {
     let id = document.getElementById('CustomerId').value;
@@ -57,31 +95,14 @@ function saveCustomer() {
     
         const customerJSON = JSON.stringify(customerObj);
 
-
-        const http = new XMLHttpRequest();
+        save(customerJSON).then(() => {
+            clearTable();
+            clearFields();
+            loadAllCustomers(); 
+            nextCustomerId();
+        })
         
-        http.onreadystatechange = () => {
-            if(http.readyState == 4){
-                if(http.status == 201){
-                    console.log('Hello');
-                }else{
-                    console.log('Request failed with status:', http.status);
-                }
-            }else{
-    
-            }
-        };
-    
-        http.open("POST", "http://localhost:8080/pos/customer", true);
-        http.setRequestHeader("Content-type", "application/json");
-        http.send(customerJSON);
-    
-        // save(customer);
-        // loadDataIntoCustomerField();
-        clearFields();
-        // nextCustomerId();
-        // clearTable();
-        // loadAllCustomers();
+        
     }
 
     
@@ -159,33 +180,11 @@ function deleteCustomer() {
     let cusId = document.getElementById('CustomerId').value;
     let customers = getAllCustomers();
 
-    // for (let i = 0; i < customers.length; i++) {
-    //     if (cusId === customers[i].cusId) {
-    //         remove(i);
-    //         break;
-    //     }
-    // }
-    // clearTable();
-    // loadAllCustomers();
-
     const customerId = document.getElementById("CustomerId").value;
-    const http = new XMLHttpRequest();
-    http.onreadystatechange = () => {
-        if(http.readyState == 4){
-            if(http.status == 201){
-
-            }else{
-
-            }
-        }else{
-
-        }
-    };
-
-    http.open("DELETE", `http://localhost:8080/pos/customer?id=${customerId}`, true);
-    http.setRequestHeader("Content-type", "application/json");
-    http.send();
-
+    remove(customerId);
+    clearTable();
+    loadAllCustomers();
+    
 }
 
 // function searchCustomer(){
@@ -213,8 +212,12 @@ function deleteCustomer() {
 // }
 
 function nextCustomerId(){
-    let customers = getAllCustomers();
-    document.getElementById('CustomerId').value = genarateCustomerID(customers[customers.length-1].cusId).toString();
+    getAll().then((customers) => {
+        document.getElementById('CustomerId').value = (genarateCustomerID(customers[customers.length-1].id.toString()));
+    })
+
+    // let customers = getAll();
+    // document.getElementById('CustomerId').value = genarateCustomerID(customers[customers.length-1].id).toString();
 }
 
 function genarateCustomerID(cusId){
@@ -228,20 +231,7 @@ function genarateCustomerID(cusId){
 
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const table = document.getElementById('customer-table');
-    const rows = table.getElementsByTagName('tr');
 
-    for (let i = 1; i < rows.length; i++) {
-        rows[i].addEventListener('click', function () {
-            const cells = this.getElementsByTagName('td');
-            document.getElementById('CustomerId').value = cells[0].innerText;
-            document.getElementById('CustomerName').value = cells[1].innerText;
-            document.getElementById('CustomerAddress').value = cells[2].innerText;
-            document.getElementById('CustomerSalary').value = cells[3].innerText;
-        });
-    }
-});
 
 document.getElementById('CustomerId').addEventListener('keydown', function(event) {
     if (event.key === 'Enter' || event.keyCode === 13) {
@@ -250,16 +240,31 @@ document.getElementById('CustomerId').addEventListener('keydown', function(event
     }
 });
 
-function getCustomer(id){
-    let customer = search(id);
+// function getCustomer(id){
+//     let customer = search(id);
     
-    // Update the UI with customer details
-    // document.getElementById('CustomerId').value = customer.cusId;
-    // document.getElementById('CustomerName').value = customer.cusName;
-    // document.getElementById('CustomerAddress').value = customer.address;
-    // document.getElementById('CustomerSalary').value = customer.salary;
+//     // Update the UI with customer details
+//     document.getElementById('CustomerId').value = customer.cusId;
+//     document.getElementById('CustomerName').value = customer.cusName;
+//     document.getElementById('CustomerAddress').value = customer.address;
+//     document.getElementById('CustomerSalary').value = customer.salary;
             
+// }
+
+function getCustomer(id) {
+    search(id)
+        .then((customer) => {
+            // Update the UI with customer details
+            document.getElementById('CustomerId').value = customer.id;
+            document.getElementById('CustomerName').value = customer.name;
+            document.getElementById('CustomerAddress').value = customer.address;
+            document.getElementById('CustomerSalary').value = customer.salary;
+        })
+        .catch((error) => {
+            console.error(error);
+        });
 }
+
 
 function updateCustomer(){
     let cusId = document.getElementById('CustomerId').value;
@@ -274,24 +279,10 @@ function updateCustomer(){
 
 
         const customerJSON = JSON.stringify(customer);
-
-        const http = new XMLHttpRequest();
-        
-        http.onreadystatechange = () => {
-            if(http.readyState == 4){
-                if(http.status == 201){
-                    console.log('Hello');
-                }else{
-                    console.log('Request failed with status:', http.status);
-                }
-            }else{
-    
-            }
-        };
-    
-        http.open("PUT", `http://localhost:8080/pos/customer?id=${cusId}`, true);
-        http.setRequestHeader("Content-type", "application/json");
-        http.send(customerJSON);
+        if(update(cusId, customerJSON)){
+            clearTable();
+            loadAllCustomers();
+        }
         
 
     // update(index, 
