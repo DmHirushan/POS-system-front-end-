@@ -279,7 +279,7 @@ function updateCustomer(){
 
 
         const customerJSON = JSON.stringify(customer);
-        if(update(cusId, customerJSON)){
+        if(update(cusId, customerJSON)){;
             clearTable();
             loadAllCustomers();
         }

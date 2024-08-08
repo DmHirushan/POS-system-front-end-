@@ -14,33 +14,35 @@ function initialAlert(){
 
 
 export function loadDataIntoItemField(){
-    let items = getAllItems();
-    let field = document.getElementById('item-select-field');
-    field.innerHTML = '';
-    for(let i=0; i<items.length; i++){
-        let option = document.createElement('option');
-        // option.value = items[i].itemCode + " " + items[i].itemName;
-        option.textContent = items[i].itemCode + " " + items[i].itemName;
-        field.appendChild(option);
-    }
-
-    field.addEventListener('change', function() {
-        let itemCode = splitItemCodeFromFieldValue(field.options[field.selectedIndex].text);
-        // let items = getAllItems();
-        let selectedItem = null;
+    getAllItems().then((items) => {
+        let field = document.getElementById('item-select-field');
+        field.innerHTML = '';
         for(let i=0; i<items.length; i++){
-            if(itemCode === items[i].itemCode){
-                selectedItem = items[i];
-            }
+            let option = document.createElement('option');
+            // option.value = items[i].itemCode + " " + items[i].itemName;
+            option.textContent = items[i].itemCode + " " + items[i].itemName;
+            field.appendChild(option);
         }
-        console.log(selectedItem);
-        document.getElementById('OrderSectionItemCode').value = selectedItem.itemCode;
-        document.getElementById('OrderSectionItemName').value = selectedItem.itemName;
-        document.getElementById('OrderSectionItemPrice').value = selectedItem.itemPrice;
-        document.getElementById('OrderSectionItemQty').value = selectedItem.itemQty;
 
-        
+        field.addEventListener('change', function() {
+            let itemCode = splitItemCodeFromFieldValue(field.options[field.selectedIndex].text);
+            // let items = getAllItems();
+            let selectedItem = null;
+            for(let i=0; i<items.length; i++){
+                if(itemCode === items[i].itemCode){
+                    selectedItem = items[i];
+                }
+            }
+            console.log(selectedItem);
+            document.getElementById('OrderSectionItemCode').value = selectedItem.itemCode;
+            document.getElementById('OrderSectionItemName').value = selectedItem.itemName;
+            document.getElementById('OrderSectionItemPrice').value = selectedItem.unitPrice;
+            document.getElementById('OrderSectionItemQty').value = selectedItem.itemQty;
+
+            
+        })
     });
+    
 
 }
 
@@ -54,27 +56,29 @@ function splitItemCodeFromFieldValue(value){
 export function loadDataIntoCustomerField(){
     let field = document.getElementById('customer-select-field');
     field.innerHTML = '';
-    let customers = getAll();  
-    for(let i=0; i<customers.length; i++){
-        let option = document.createElement('option');
-        // option.value = items[i].itemCode + " " + items[i].itemName;
-        option.textContent = customers[i].cusId + " " + customers[i].cusName;
-        field.appendChild(option);
-    }
-
-    field.addEventListener('change', function() { 
-        let selectedCustomer = null;
+    getAll().then((customers) => {
         for(let i=0; i<customers.length; i++){
-            if(splitItemCodeFromFieldValue(field.options[field.selectedIndex].text) === customers[i].cusId){
-                selectedCustomer = customers[i];
-            }
+            let option = document.createElement('option');
+            // option.value = items[i].itemCode + " " + items[i].itemName;
+            option.textContent = customers[i].id + " " + customers[i].name;
+            field.appendChild(option);
         }
-        console.log(selectedCustomer);
-        document.getElementById('OrderSectionCustomerId').value = selectedCustomer.cusId;
-        document.getElementById('OrderSectionCustomerName').value = selectedCustomer.cusName;
-        document.getElementById('OrderSectionCustomerSalary').value = selectedCustomer.cusSalary;
-        document.getElementById('OrderSectionCustomerAddress').value = selectedCustomer.cusAddress;
-    })
+    
+        field.addEventListener('change', function() { 
+            let selectedCustomer = null;
+            for(let i=0; i<customers.length; i++){
+                if(splitItemCodeFromFieldValue(field.options[field.selectedIndex].text) === customers[i].id){
+                    selectedCustomer = customers[i];
+                }
+            }
+            console.log(selectedCustomer);
+            document.getElementById('OrderSectionCustomerId').value = selectedCustomer.id;
+            document.getElementById('OrderSectionCustomerName').value = selectedCustomer.name;
+            document.getElementById('OrderSectionCustomerSalary').value = selectedCustomer.salary;
+            document.getElementById('OrderSectionCustomerAddress').value = selectedCustomer.address;
+        })
+    });  
+    
 }
 
 
@@ -111,7 +115,7 @@ let orderQuantity = document.getElementById('OrderQuantity');
 
 
 export function loadTable(){
-    if(checkItemQty()){
+    checkItemQty().then(() =>  {
         let table = document.getElementById('order-table');
         let rowsLength = table.rows.length;
         // findTotal();
@@ -130,25 +134,41 @@ export function loadTable(){
         }
         clearFields();
         findTotal();
-    }else{
-        alert('This much amount is not avilable in the Store!');
-    }  
+    }).catch((error) => {
+        alert("This much quantity is not available!");
+    })
+
+    // if(checkItemQty()){
+        
+    // }else{
+    //     alert('This much amount is not avilable in the Store!');
+    // }  
 
 }
 
 function checkItemQty(){
-    let itemsArray = getAllItems();
-    for(let i=0; i<itemsArray.length; i++){
-        if(itemCodeTextField.value === itemsArray[i].itemCode){
-            if(orderQuantity.value <= itemsArray[i].itemQty){
-                console.log(itemsArray[i].itemQty - parseInt(orderQuantity.value, 10));
-                itemsArray[i].itemQty = itemsArray[i].itemQty - parseInt(orderQuantity.value, 10);
-                console.log(itemsArray);
-                update(i, itemsArray[i]);
-                return true;
+    return new Promise ((resolve, reject) => {
+        getAllItems().then((itemsArray) => {
+            for(let i=0; i<itemsArray.length; i++){
+                console.log('check krna tana', itemsArray[i].itemCode);
+                if(itemCodeTextField.value === itemsArray[i].itemCode){
+                    if(orderQuantity.value < itemsArray[i].itemQty){
+                        console.log('Pahala : ', orderQuantity.value, itemsArray[i].itemQty);
+                        console.log(itemsArray[i].itemQty - parseInt(orderQuantity.value, 10));
+                        itemsArray[i].itemQty = itemsArray[i].itemQty - parseInt(orderQuantity.value, 10);
+                        console.log(itemsArray);
+                        // update(itemCodeTextField.value, itemsArray[i]);
+                        resolve(true); 
+                    }else{
+                        reject(false);
+                    }
+                }
             }
-        }
-    }
+        })
+    })
+
+    
+    
 }
 
 function calculateOneItemTotal(){

@@ -209,13 +209,18 @@ function updateItem(){
         itemCode : document.getElementById('ItemCode').value,
         itemName : document.getElementById('ItemName').value,
         itemQty : document.getElementById('ItemQty').value,
-        itemPrice : document.getElementById('UnitPrice').value
+        unitPrice : document.getElementById('UnitPrice').value
     };
     let itemJson = JSON.stringify(item);
+    console.log('update eka', itemCode);
+    console.log('update eka', itemJson);
     update(itemCode, itemJson).then(() => {
+        alert('Item Update Successful!');
         clearFields();
         clearTable();
         loadAllItems();
+    }).catch(() => {
+        alert('Something went wrong!');
     });
 }
 

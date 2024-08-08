@@ -36,7 +36,7 @@ export function getAllItems(){
                 console.log('items : ', items);
                 resolve(items);
             } else {
-                reject('Request failed with status:', http.status);
+                console.log('Request failed with status:', http.status);
             }
         }
         // return customer;
@@ -95,7 +95,8 @@ export function remove(itemCode){
 }
 
 
-export function update(itemCode, itemJSON){
+export function update(itemCode, itemJson){
+    
     return new Promise ((resolve, reject) => {
         const http = new XMLHttpRequest();
         
@@ -105,7 +106,7 @@ export function update(itemCode, itemJSON){
                     console.log('Hello');
                     resolve(true);
                 }else{
-                    reject('Request failed with status:', http.status);
+                    console.log('Request failed with status:', http.status);
                 }
             }else{
 
@@ -114,6 +115,6 @@ export function update(itemCode, itemJSON){
 
         http.open("PUT", `http://localhost:8080/pos/item?itemCode=${itemCode}`, true);
         http.setRequestHeader("Content-type", "application/json");
-        http.send(itemJSON);
+        http.send(itemJson);
     })
 }
