@@ -1,49 +1,5 @@
 import { customers } from '../database/db.js'
 
-// export function getAllCustomers(){
-//     return customers;
-// }
-
-// export function getAll(){
-//     let customers = [];
-//     const http = new XMLHttpRequest();
-    
-//     http.onreadystatechange = () => {
-//         if (http.readyState == 4) {
-//             if (http.status == 200) {
-//                 customers = JSON.parse(http.responseText);
-//                 console.log(customers);
-                
-//                 let tableBody = document.getElementById('customer-table-body');
-
-//                 let customer;
-//                 for(let i=0; i<customers.length; i++){
-//                     customer = customers[i];
-//                     let newRow = tableBody.insertRow();
-
-//                     let cell1 = newRow.insertCell(0);
-//                     let cell2 = newRow.insertCell(1);
-//                     let cell3 = newRow.insertCell(2);
-//                     let cell4 = newRow.insertCell(3);
-
-//                     cell1.textContent = customer.id;
-//                     cell2.textContent = customer.name;
-//                     cell3.textContent = customer.address;
-//                     cell4.textContent = customer.salary;
-//                 }
-                
-//                 return customers;
-//             } else {
-//                 console.log('Request failed with status:', http.status);
-//             }
-//         }
-//         // return customer;
-//     };
-    
-//     http.open("GET", `http://localhost:8080/pos/customer?type=${'all'}`, true);
-//     http.setRequestHeader("Content-type", "application/json");
-//     http.send();
-// }
 
 export function getAll(){
     return new Promise ((resolve, reject) => {
@@ -80,7 +36,7 @@ export function save(customerJSON){
                 console.log('Hello');
                 resolve(true);
             }else{
-                resolve(false);
+                reject(false);
                 console.log('Request failed with status:', http.status);
             }
         }else{

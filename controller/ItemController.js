@@ -1,4 +1,4 @@
-import { getAllItems, remove, save, update } from "../model/ItemModel.js";
+import { getAllItems, getItem, remove, save, update } from "../model/ItemModel.js";
 import { loadDataIntoItemField } from '../controller/OrderController.js';
 
 export { saveItem, deleteItem, updateItem, clearFields }
@@ -7,11 +7,31 @@ loadAllItems();
 
 function loadAllItems(){
     loadNextItemCode();
-    let items = getAllItems();
-    for(let i=0; i<items.length; i++){
-        reloadTable(items[i])
-    }
+
+    getAllItems().then((items) => {
+        for(let i=0; i<items.length; i++){
+            reloadTable(items[i])
+        }
+    })
+    
 }
+
+document.getElementById('ItemCode').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' || event.keyCode === 13) {
+        const itemCode = event.target.value;
+        getItem(itemCode).then((item) => {
+            displayValues(item);
+        });
+    }
+});
+
+function displayValues(item){
+    document.getElementById('ItemCode').value = item.itemCode;
+    document.getElementById('ItemName').value = item.itemName;
+    document.getElementById('ItemQty').value = item.itemQty;
+    document.getElementById('UnitPrice').value = item.unitPrice;
+}
+
 
 function reloadTable(Item){
     // alert('kjhkds')
@@ -31,7 +51,7 @@ function reloadTable(Item){
     cell1.innerHTML = Item.itemCode;
     cell2.innerHTML = Item.itemName;
     cell3.innerHTML = Item.itemQty;
-    cell4.innerHTML = Item.itemPrice;
+    cell4.innerHTML = Item.unitPrice;
 }
 
 function clearTable() {
@@ -40,8 +60,10 @@ function clearTable() {
 }
 
 function loadNextItemCode(){
-    let items = getAllItems();
-    document.getElementById('ItemCode').value = genarateItemCode(items[items.length-1].itemCode);
+    getAllItems().then((items) => {
+        document.getElementById('ItemCode').value = genarateItemCode(items[items.length-1].itemCode);
+    });
+    
 }
 
 function genarateItemCode(currentItemCode){
@@ -58,23 +80,28 @@ let itemNameTextField = document.getElementById('ItemName');
 let itemQtyTextField = document.getElementById('ItemQty');
 let unitPriceTextField = document.getElementById('UnitPrice');
 
+
+
 function saveItem(){
     console.log('bdu wda');
     let itemCode = itemCodeTextField.value;
     let itemName = itemNameTextField.value;
     let itemQty = itemQtyTextField.value;
-    let itemPrice = unitPriceTextField.value;
-    if(validate(itemName,itemQty,itemPrice)){
+    let unitPrice = unitPriceTextField.value;
+    if(validate(itemName,itemQty,unitPrice)){
         let Item = {
             itemCode : itemCode,
             itemName : itemName,
             itemQty : itemQty,
-            itemPrice : itemPrice
+            unitPrice : unitPrice
         }
-        save(Item);
-        loadDataIntoItemField();
-        clearTable();
-        loadAllItems();
+        let itemJSON = JSON.stringify(Item);
+        save(itemJSON).then(() => {
+            loadDataIntoItemField();
+            clearTable();
+            loadAllItems();
+        });
+        
     }
     
 }
@@ -136,20 +163,19 @@ function clearFields(){
 }
 
 function deleteItem(){
-    let result =false;
-    let items = getAllItems();
-    for(let i=0; i<items.length; i++){
-        if(itemCodeTextField.value === items[i].itemCode){
-            console.log(itemCodeTextField.value)
-            remove(i);
+    let result = false;
+    let itemCode = itemCodeTextField.value;
+    remove(itemCode).then(() => {
             result = true;
             clearTable();
             loadAllItems();
-        }
-    }
-    if(result === false){
-        alert('Something went wrong!');
-    }
+            if(result === false){
+                alert('Something went wrong!');
+            }else{
+                alert('Item Deleted!');
+            }
+    });
+    
 }
 
 // function searchItem(){
@@ -179,25 +205,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function updateItem(){
     let itemCode = document.getElementById('ItemCode').value;
-    let items = getAllItems();
-    let index = null;
-    for(let i=0; i<items.length; i++){
-        if(itemCode === items[i].itemCode){
-            index = i;
-            break;
-        }
-    }
-    update(index, 
-        {
-            itemCode : document.getElementById('ItemCode').value,
-            itemName : document.getElementById('ItemName').value,
-            itemQty : document.getElementById('ItemQty').value,
-            itemPrice : document.getElementById('UnitPrice').value
-        }
-    );
-    clearFields();
-    clearTable();
-    loadAllItems();
+    let item = {
+        itemCode : document.getElementById('ItemCode').value,
+        itemName : document.getElementById('ItemName').value,
+        itemQty : document.getElementById('ItemQty').value,
+        itemPrice : document.getElementById('UnitPrice').value
+    };
+    let itemJson = JSON.stringify(item);
+    update(itemCode, itemJson).then(() => {
+        clearFields();
+        clearTable();
+        loadAllItems();
+    });
 }
 
 
