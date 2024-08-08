@@ -102,11 +102,13 @@ export function update(itemCode, itemJson){
         
         http.onreadystatechange = () => {
             if(http.readyState == 4){
+                resolve(true);
                 if(http.status == 201){
+                    
                     console.log('Hello');
-                    resolve(true);
+                    
                 }else{
-                    console.log('Request failed with status:', http.status);
+                    reject('Request failed with status:', http.status);
                 }
             }else{
 

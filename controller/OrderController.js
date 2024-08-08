@@ -157,8 +157,12 @@ function checkItemQty(){
                         console.log(itemsArray[i].itemQty - parseInt(orderQuantity.value, 10));
                         itemsArray[i].itemQty = itemsArray[i].itemQty - parseInt(orderQuantity.value, 10);
                         console.log(itemsArray);
-                        // update(itemCodeTextField.value, itemsArray[i]);
-                        resolve(true); 
+                        update(itemCodeTextField.value, JSON.stringify(itemsArray[i])).then(() => {
+                            loadDataIntoItemField();
+                            
+                        });
+                        resolve(true);
+                         
                     }else{
                         reject(false);
                     }
@@ -255,12 +259,16 @@ export function save(){
 
     let order = {
         orderId : orderId,
-        cusId : cusId,
+        customerId : cusId,
         date : date,
         subTotal : subTotal,
         total : total
     }
-    saveOrder(order);
-    clearCustomerDetailTextFields();
-    alert('Order Purchased Successfully!');
+    let orderJson = JSON.stringify(order);
+    console.log('order json : ', orderJson);
+    saveOrder(orderJson).then(() => {
+        alert('Order Purchased Successfully!');
+        clearCustomerDetailTextFields();
+    });
+    
 }
