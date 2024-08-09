@@ -29,3 +29,28 @@ export function saveOrder(orderJson){
     http.send(orderJson);
     })
 }
+
+export function saveOrderDetail(orderDetails){
+    return new Promise ((resolve, reject) => {
+        const http = new XMLHttpRequest();
+        
+        http.onreadystatechange = () => {
+        if(http.readyState == 4){
+            resolve(true);
+            if(http.status == 201){
+                console.log('Hello');
+                
+            }else{
+                reject(false);
+                console.log('Request failed with status:', http.status);
+            }
+        }else{
+
+        }
+    };
+
+    http.open("POST", `http://localhost:8080/pos/placeorder?type=${'orderdetail'}`, true);
+    http.setRequestHeader("Content-type", "application/json");
+    http.send(orderDetails);
+    })
+}

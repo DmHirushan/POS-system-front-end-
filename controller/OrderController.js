@@ -1,6 +1,6 @@
 import { getAllItems, update } from "../model/ItemModel.js";
 import { getAll } from "../model/CustomerModel.js";
-import { getAllOrders } from "../model/OrderModel.js";
+import { getAllOrders, saveOrderDetail } from "../model/OrderModel.js";
 import { saveOrder } from "../model/OrderModel.js";
 
 // initialAlert();
@@ -260,15 +260,36 @@ export function save(){
     let order = {
         orderId : orderId,
         customerId : cusId,
-        date : date,
-        subTotal : subTotal,
+        // date : date,
+        // subTotal : subTotal,     
         total : total
     }
     let orderJson = JSON.stringify(order);
     console.log('order json : ', orderJson);
     saveOrder(orderJson).then(() => {
+        saveOrderDetails();
         alert('Order Purchased Successfully!');
         clearCustomerDetailTextFields();
     });
     
 }
+
+function saveOrderDetails(){
+    let tableRowCount = document.getElementById('order-table').rows.length;
+    let table = document.getElementById('order-table');
+    let total = 0;
+    let orderDetails = [];
+    let orderDetail = {};
+    for(let i=1; i<tableRowCount; i++){
+        orderDetail = {
+            orderId : document.getElementById('OrderSectionOrderId').value,
+            itemCode :  table.rows[i].cells[0].innerHTML,
+            unitPrice : table.rows[i].cells[2].innerHTML,
+            qty : table.rows[i].cells[3].innerHTML
+        }
+        orderDetails.push(orderDetail);
+    }
+    saveOrderDetail(orderDetails);
+}
+    
+
